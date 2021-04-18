@@ -33,7 +33,7 @@ def get_unix_dns_ips():
     return dns_ips
 
 def getIPLayerAddressingParameters(INTERFACE):
-    
+        
     ifaddresses = netifaces.ifaddresses(INTERFACE)[netifaces.AF_INET][0]
     gateways = netifaces.gateways()[GATEWAY][netifaces.AF_INET]
 
@@ -48,6 +48,8 @@ def getIPLayerAddressingParameters(INTERFACE):
     return IP_Info
     
 if __name__=="__main__":
-    INTERFACE = "wlan0"
+    # While running on Kali, make INTERFACE as eth0
+    # While running on Pi, make INTERFACE as wlan0
+    INTERFACE = "eth0"
     print(getIPLayerAddressingParameters(INTERFACE))
     
