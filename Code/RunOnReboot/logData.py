@@ -1,12 +1,15 @@
 import time
 import json
 import requests
+import datetime
 import sys
 
 def needNewToken():
 
     # Interval in seconds    
-    interval = 30
+    # interval = 30
+
+    interval = 72000
 
     currentTime = time.time()
 
@@ -22,17 +25,19 @@ def needNewToken():
     readTime = tokenTimeFile.readline()
     tokenTimeFile.close()    
     previousTime = float(readTime)      
-    # print("Previous Time: ",previousTime)      
+    print("Previous Time: ",previousTime)      
 
-    # print("Need: ",currentTime<previousTime+interval)    
+    print("Need: ",currentTime,previousTime+interval)    
 
     if currentTime<previousTime+interval:        
+        print("False")
         return False
     
     tokenTimeFile = open("tokenTime.txt", "w")
     tokenTimeFile.write(str(currentTime))
     tokenTimeFile.close()
 
+    print("True")
     return True
 
 def createNewToken():
@@ -82,7 +87,7 @@ def getToken():
     else:
         return createNewToken()    
 
-def writeData(digitalTwinInfo):        
+def writeData(digitalTwinInfo, counter):        
 
     url = "34.94.115.157:4000"    
     channelName = "common"
@@ -91,7 +96,7 @@ def writeData(digitalTwinInfo):
     authToken = getToken()
 
     # print("AuthToken: ",authToken)
-
+    t = time.time() 
     timestamp = int(time.time()*1000.0)
 
     headers = {
@@ -105,13 +110,26 @@ def writeData(digitalTwinInfo):
     body = {
     'peers': ['peer2.machine1.clientMachine.chainrider.io'],
     'fcn': 'insertAsset',
-    'args': [str(timestamp), json.dumps(digitalTwinInfo)],
+    'args': [str(timestamp), json.dumps(digitalTwinInfo, ensure_ascii=False)],
     }
 
-    # postURL = "http://{}/channels/{}/chaincodes/{}".format(url, channelName, smartContractName)
-    # response = requests.post(postURL, data=json.dumps(body), headers=headers)
+    postURL = ''
+    postURL = "http://{}/channels/{}/chaincodes/{}".format(url, channelName, smartContractName)
+    response = requests.post(postURL, data=json.dumps(body), headers=headers)
     # print("Timestamp: ",timestamp)
     # print("Response: ",response)
+
+    date_time = datetime.datetime.fromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S')
+    print("@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-")
+    print("Logging...")
+    print('Timestamp: ',timestamp)
+    print("Response: ", response)
+    print("@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-")
+    with open('writeLog', 'a') as logFile:
+        logFile.write("{}. Transaction Time Epoch [{}] - [{}]: -> Response: {}".format(counter, timestamp, date_time, str(response)))                
+        logFile.write('\n')
+
+    return response
 
 '''
 digitalTwinInfo =   {
@@ -121,7 +139,7 @@ digitalTwinInfo =   {
                     }
 '''
 
-digitalTwinInfo =   {"name": "Automation Trial", "machine": "laptopWindows", "city": "Tempe" }
+digitalTwinInfo =   {"name": "Automation Trial", "machine": "laptopWindows", "city": "Tempe"}
 
 if __name__=="__main__":
-    writeData(digitalTwinInfo)
+    writeData(digitalTwinInfo, 0)

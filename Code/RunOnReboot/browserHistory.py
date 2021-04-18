@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import time
 
 # INTERVAL should be specified in minutes
-INTERVAL = 12000
+INTERVAL = 0.5
 
 # Only checks for mozilla firefox
 def getBrowserPaths(username):
@@ -23,7 +23,7 @@ def getBrowserPaths(username):
                 browser_path_dict['firefox'] = browserPath
     return browser_path_dict
 
-def getBrowserHistory():
+def getBrowserHistory(Interval=INTERVAL):
     """Get the user's browsers history by using sqlite3 module to connect to the dabases.
        It returns a dictionary: its key is a name of browser in str and its value is a list of
        tuples, each tuple contains four elements, including url, title, and visited_time. 
@@ -36,14 +36,14 @@ def getBrowserHistory():
        >>> dict_keys(['safari', 'chrome', 'firefox'])
        >>> dict_obj['safari'][0]
        >>> ('https://mail.google.com', 'Mail', '2018-08-14 08:27:26')
-    """
+    """    
     # browserhistory is a dictionary that stores the query results based on the name of browsers.
     browserhistory = {}
 
     # call get_database_paths() to get database paths.
     paths2databases = getBrowserPaths(os.getlogin())        
     currentTime = int(time.time())
-    lastTime = currentTime - INTERVAL*60        
+    lastTime = (currentTime - INTERVAL*60)*1000000     
     for browser, path in paths2databases.items():
         try:
             conn = sqlite3.connect(path)
@@ -52,10 +52,10 @@ def getBrowserHistory():
             # SQL command for browsers' database table
             if browser == 'chrome':
                 _SQL = """SELECT url, title, datetime((last_visit_time/1000000)-11644473600, 'unixepoch', 'localtime') 
-                                    AS last_visit_time FROM urls ORDER BY last_visit_time DESC"""
+                                    AS last_visit_time FROM urls where last_visit_time>{} ORDER BY last_visit_time DESC""".format(lastTime)
             elif browser == 'firefox':
                 _SQL = """SELECT url, title, datetime((visit_date/1000000), 'unixepoch', 'localtime') AS visited_date
-                                    FROM moz_places INNER JOIN moz_historyvisits on moz_historyvisits.place_id = moz_places.id where visit_date>{} ORDER BY visited_date DESC LIMIT 5""".format(lastTime*1000000)                                            
+                                    FROM moz_places INNER JOIN moz_historyvisits on moz_historyvisits.place_id = moz_places.id where visit_date>{} ORDER BY visited_date DESC LIMIT 5""".format(lastTime)                                            
             elif browser == 'safari':
                 _SQL = """SELECT url, title, datetime(visit_time + 978307200, 'unixepoch', 'localtime') 
                                     FROM history_visits INNER JOIN history_items ON history_items.id = history_visits.history_item ORDER BY visit_time DESC"""
@@ -83,8 +83,20 @@ def getBrowserHistory():
         except sqlite3.OperationalError:
             print('* ' + browser.upper() + ' Database Permission Denied.')
 
-    return browserhistory
+    bHistory = {}
+    bHistory['Data'] = []
+    for index, history in enumerate(browserhistory['firefox']):        
+        dataEntry = {}
+        # print(index+1, ': ', history)        
+        for i in range(len(columnNames)):
+            if history[i]:
+                if type(history[i])==int:
+                    dataEntry[columnNames[i]] = history[i]
+                else:
+                    dataEntry[columnNames[i]] = history[i].encode('ascii')
+        bHistory['Data'].append(dataEntry)
+    # print("------------------------------------------------")    
+    return bHistory
 
-for index, history in enumerate(getBrowserHistory()['firefox']):
-    print(index+1, ': ', history)
-    print("------------------------------------------------")
+if __name__=="__main__":
+    print(getBrowserHistory(INTERVAL))

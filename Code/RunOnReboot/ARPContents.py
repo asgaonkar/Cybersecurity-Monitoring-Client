@@ -16,8 +16,8 @@ def getARPTable():
     return arpTable
 
 def getARPContent():
-    arpCache = getARPCache
-    arpTable = getARPTable
+    arpCache = getARPCache()
+    arpTable = getARPTable()
 
     return {"arpCache": arpCache, "arpTable": arpTable}
 

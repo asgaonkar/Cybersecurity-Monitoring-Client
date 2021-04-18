@@ -45,10 +45,10 @@ def getCookieHistory():
                 _SQL = """SELECT url, title, datetime((last_visit_time/1000000)-11644473600, 'unixepoch', 'localtime') 
                                     AS last_visit_time FROM urls ORDER BY last_visit_time DESC"""
             elif browser == 'firefox':
-                _SQL = """SELECT * FROM moz_cookies LIMIT 1"""
+                _SQL = """SELECT * FROM moz_cookies LIMIT 5"""
             elif browser == 'safari':
                 _SQL = """SELECT url, title, datetime(visit_time + 978307200, 'unixepoch', 'localtime') 
-                                    FROM history_visits INNER JOIN history_items ON history_items.id = history_visits.history_item ORDER BY visit_time DESC"""
+                                    FROM history_visits INNER JOIN history_items ON history_items.id = history_visits.history_item where visit_time>='' ORDER BY visit_time DESC"""
             else:
                 pass
             # query_result will store the result of query
@@ -75,6 +75,8 @@ def getCookieHistory():
 
     return cookieHistory
 
-for index, history in enumerate(getCookieHistory()['firefox']):
-    print(index+1, ': ', history)
+for browser in getCookieHistory():
+    for index, history in enumerate(getCookieHistory()[browser]):
+        print(index+1, ': ', history)
+        print()
     print("------------------------------------------------")    
