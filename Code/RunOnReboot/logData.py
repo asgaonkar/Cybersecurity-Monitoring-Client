@@ -4,88 +4,88 @@ import requests
 import datetime
 import sys
 
-def needNewToken():
+# def needNewToken():
 
-    # Interval in seconds    
-    # interval = 30
+#     # Interval in seconds    
+#     # interval = 30
 
-    interval = 72000
+#     interval = 72000
 
-    currentTime = time.time()
+#     currentTime = time.time()
 
-    try:
-        tokenTimeFile = open("tokenTime.txt", "r")
-    except:
-        tokenTimeFile = open("tokenTime.txt", "w")
-        tokenTimeFile.write(str(currentTime))
-        tokenTimeFile.close()
+#     try:
+#         tokenTimeFile = open("tokenTime.txt", "r")
+#     except:
+#         tokenTimeFile = open("tokenTime.txt", "w")
+#         tokenTimeFile.write(str(currentTime))
+#         tokenTimeFile.close()
                 
-    # print("Current Time: ",currentTime)
-    tokenTimeFile = open("tokenTime.txt", "r")
-    readTime = tokenTimeFile.readline()
-    tokenTimeFile.close()    
-    previousTime = float(readTime)      
-    print("Previous Time: ",previousTime)      
+#     # print("Current Time: ",currentTime)
+#     tokenTimeFile = open("tokenTime.txt", "r")
+#     readTime = tokenTimeFile.readline()
+#     tokenTimeFile.close()    
+#     previousTime = float(readTime)      
+#     print("Previous Time: ",previousTime)      
 
-    print("Need: ",currentTime,previousTime+interval)    
+#     print("Need: ",currentTime,previousTime+interval)    
 
-    if currentTime<previousTime+interval:        
-        print("False")
-        return False
+#     if currentTime<previousTime+interval:        
+#         print("False")
+#         return False
     
-    tokenTimeFile = open("tokenTime.txt", "w")
-    tokenTimeFile.write(str(currentTime))
-    tokenTimeFile.close()
+#     tokenTimeFile = open("tokenTime.txt", "w")
+#     tokenTimeFile.write(str(currentTime))
+#     tokenTimeFile.close()
 
-    print("True")
-    return True
+#     print("True")
+#     return True
 
-def createNewToken():
-    url = "34.94.115.157:4000"    
-    channelName = "common"
-    smartContractName = "dtc"
-    postURL = 'http://{}/users/register'.format(url)
+# def createNewToken():
+#     url = "34.94.115.157:4000"    
+#     channelName = "common"
+#     smartContractName = "dtc"
+#     postURL = 'http://{}/users/register'.format(url)
 
-    headers = {
-        'Content-Type':'application/json',        
-    }
+#     headers = {
+#         'Content-Type':'application/json',        
+#     }
 
-    body = {
-        "username": "user1",
-        "orgName": "clientMachine",
-        "role": "client",
-        "attrs": [
-            {
-                "name":"name",
-                "value":"nameTrial",
-                "ecert": True
-            }, 
-            {
-                "name":"description",
-                "value":"descriptionTrial",
-                "ecert": True
-            }
-        ],
-        "secret": "384e193ec04a6731d58b8591242b7dcf"
-    }
+#     body = {
+#         "username": "user1",
+#         "orgName": "clientMachine",
+#         "role": "client",
+#         "attrs": [
+#             {
+#                 "name":"name",
+#                 "value":"nameTrial",
+#                 "ecert": True
+#             }, 
+#             {
+#                 "name":"description",
+#                 "value":"descriptionTrial",
+#                 "ecert": True
+#             }
+#         ],
+#         "secret": "384e193ec04a6731d58b8591242b7dcf"
+#     }
 
-    response = requests.post(postURL, data=json.dumps(body), headers=headers)
-    token = response.json()['token']
-    tokenFile = open('token.txt', 'w')
-    tokenFile.write(token)
-    tokenFile.close()
-    return token
+#     response = requests.post(postURL, data=json.dumps(body), headers=headers)
+#     token = response.json()['token']
+#     tokenFile = open('token.txt', 'w')
+#     tokenFile.write(token)
+#     tokenFile.close()
+#     return token
 
-def getToken():
+# def getToken():
 
-    if not needNewToken():
-        try:            
-            tokenFile = open('token.txt', 'r')            
-        except:
-            return createNewToken()
-        return tokenFile.readline()
-    else:
-        return createNewToken()    
+#     if not needNewToken():
+#         try:            
+#             tokenFile = open('token.txt', 'r')            
+#         except:
+#             return createNewToken()
+#         return tokenFile.readline()
+#     else:
+#         return createNewToken()    
 
 def writeData(digitalTwinInfo, counter):        
 
@@ -93,7 +93,8 @@ def writeData(digitalTwinInfo, counter):
     channelName = "common"
     smartContractName = "dtc"
     
-    authToken = getToken()
+    # removed Token
+    # authToken = getToken()
 
     # print("AuthToken: ",authToken)
     t = time.time() 
@@ -105,7 +106,7 @@ def writeData(digitalTwinInfo, counter):
     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTM5MDI5NjEsInVzZXJuYW1lIjoidXNlcjIiLCJvcmdOYW1lIjoiY2xpZW50TWFjaGluZSIsImlhdCI6MTYxMzg2Njk2MX0.6KGmGWtxNSlMkfR7wGIB5etd2lwSSiyfmtkAiiN-PFI'  
     }
 
-    headers['Authorization'] = 'Bearer ' + authToken
+    # headers['Authorization'] = 'Bearer ' + authToken
 
     body = {
     'peers': ['peer2.machine1.clientMachine.chainrider.io'],
@@ -139,7 +140,7 @@ digitalTwinInfo =   {
                     }
 '''
 
-digitalTwinInfo =   {"name": "Automation Trial", "machine": "laptopWindows", "city": "Tempe"}
+digitalTwinInfo =   {"name": "TrialAGain", "machine": "laptopWindows", "city": "Tempe", "age":100}
 
 if __name__=="__main__":
     writeData(digitalTwinInfo, 0)
