@@ -148,19 +148,22 @@ class requirementSniffThread(threading.Thread):
          data = {}
          data['timestamp'] = str(packet.time)                     
          TCP_Data = {}
-         IPVersion = IP if IP in packet else IPv6
-         ip_src=packet[IPVersion].src
-         ip_dst=packet[IPVersion].dst
+         IPVersion = IP if IP in packet else IPv6         
          try:
-            tcp_sport=packet[TCP].sport
-            tcp_dport=packet[TCP].dport                                          
-            TCP_Data['Source Port'] = tcp_sport
-            TCP_Data['Destination Port'] = tcp_dport
-            # print("TCP Transaction: {}(:{}) -> {}(:{})".format(ip_src,tcp_sport,ip_dst,tcp_dport))                           
+            ip_src=packet[IPVersion].src
+            ip_dst=packet[IPVersion].dst
+            try:
+               tcp_sport=packet[TCP].sport
+               tcp_dport=packet[TCP].dport                                          
+               TCP_Data['Source Port'] = tcp_sport
+               TCP_Data['Destination Port'] = tcp_dport
+               # print("TCP Transaction: {}(:{}) -> {}(:{})".format(ip_src,tcp_sport,ip_dst,tcp_dport))                           
+            except:
+               # print("TCP Transaction: {} -> {})".format(ip_src,ip_dst))               
+               TCP_Data['Source IP'] = ip_src
+               TCP_Data['Destination IP'] =  ip_dst
          except:
-            # print("TCP Transaction: {} -> {})".format(ip_src,ip_dst))               
-            TCP_Data['Source IP'] = ip_src
-            TCP_Data['Destination IP'] =  ip_dst    
+            pass
          data['data'] = TCP_Data
          completeData.append(data)
       self.tcpData['TCP'] = completeData
